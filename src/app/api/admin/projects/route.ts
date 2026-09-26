@@ -70,6 +70,12 @@ export async function POST(request: Request) {
   await fs.mkdir(dir, { recursive: true });
 
   const files = form.getAll("images").filter((f): f is File => f instanceof File && f.size > 0);
+  if (files.length === 0) {
+    return NextResponse.json(
+      { error: "Please upload at least one image — the first one becomes the project cover." },
+      { status: 400 }
+    );
+  }
   const images: StoredProject["allImages"] = [];
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
