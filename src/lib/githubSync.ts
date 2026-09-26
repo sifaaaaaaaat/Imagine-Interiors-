@@ -64,6 +64,21 @@ export async function commitProjects(
   );
 }
 
+/** Reads src/data/projects.json from the repo (raw). Returns null if it does not exist. */
+export async function fetchProjectsFile(): Promise<string | null> {
+  const res = await fetch(
+    `${API}/${encodeURI("src/data/projects.json")}?ref=${BRANCH}`,
+    { headers: { ...headers(), Accept: "application/vnd.github.raw" }, cache: "no-store" }
+  );
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    throw new Error(
+      `GitHub GET projects.json: ${res.status} ${await res.text()}`
+    );
+  }
+  return res.text();
+}
+
 /** Commits one image under public/projects/<slug>/. */
 export async function commitImage(
   slug: string,

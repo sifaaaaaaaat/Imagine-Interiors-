@@ -156,11 +156,15 @@ export default function AdminPage() {
         setBanner({ kind: "err", text: data.error ?? "Save failed." });
         return;
       }
-      let text = `Project "${data.project.title}" added — now live on the site.`;
+      let text = `Project "${data.project.title}" added.`;
       if (data.githubError) {
         text += ` ⚠ Saved locally but GitHub sync failed: ${data.githubError}`;
       } else if (data.syncedToGithub) {
-        text += " Committed to GitHub.";
+        text += " Committed to GitHub — your live site redeploys automatically in 1–2 minutes.";
+      } else if (data.savedLocally === false) {
+        text += " ⚠ Saved to GitHub but the local filesystem is read-only.";
+      } else {
+        text += " Saved locally (add GITHUB_TOKEN to update the live site).";
       }
       setBanner({ kind: data.githubError ? "err" : "ok", text });
       setForm(EMPTY_FORM);
@@ -198,8 +202,12 @@ export default function AdminPage() {
         setBanner({ kind: "err", text: data.error ?? "Delete failed." });
         return;
       }
-      let text = `Project "${p.title}" removed from the site.`;
-      if (data.githubError) text += ` ⚠ GitHub sync failed: ${data.githubError}`;
+      let text = `Project "${p.title}" removed.`;
+      if (data.githubError) {
+        text += ` ⚠ GitHub sync failed: ${data.githubError}`;
+      } else if (data.syncedToGithub) {
+        text += " Committed to GitHub — your live site redeploys automatically in 1–2 minutes.";
+      }
       setBanner({ kind: data.githubError ? "err" : "ok", text });
       const refreshed = await fetchProjects(token);
       setProjects(refreshed.projects);

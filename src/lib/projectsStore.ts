@@ -1,5 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
+import { fetchProjectsFile, syncEnabled } from "./githubSync";
 
 const DATA_FILE = path.join(process.cwd(), "src", "data", "projects.json");
 
@@ -36,8 +37,52 @@ export async function readProjects(): Promise<StoredProject[]> {
   return parsed as StoredProject[];
 }
 
-export async function writeProjects(projects: StoredProject[]): Promise<void> {
-  const tmp = `${DATA_FILE}.tmp`;
-  await fs.writeFile(tmp, JSON.stringify(projects, null, 2) + "\n", "utf8");
-  await fs.rename(tmp, DATA_FILE);
+/**
+ * Best available project list. When GitHub sync is enabled the committed
+ * projects.json is the source of truth (hosting filesystems like Vercel's are
+ * read-only); otherwise we read the local file.
+ */
+export async function loadProjects(): Promise<StoredProject[]> {
+  if (syncEnabled()) {
+    try {
+      const raw = await fetchProjectsFile();
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed as StoredProject[];
+      }
+    } catch {
+      // fall through to the local copy bundled with the deployment
+    }
+  }
+  return readProjects();
+}
+
+/**
+ * Writes projects.json locally. On read-only hosting filesystems this is a
+ * no-op that returns false — GitHub (see commitProjects) remains the source of
+ * truth there and the host rebuilds from it.
+ */
+export async function writeProjects(projects: StoredProject[]): Promise<boolean> {
+  try {
+    const tmp = `${DATA_FILE}.tmp`;
+    await fs.writeFile(tmp, JSON.stringify(projects, null, 2) + "\n", "utf8");
+    await fs.rename(tmp, DATA_FILE);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Best-effort local file write; returns false when the filesystem is read-only. */
+export async function tryWriteFile(
+  filePath: string,
+  data: Buffer
+): Promise<boolean> {
+  try {
+    await fs.mkdir(path.dirname(filePath), { recursive: true });
+    await fs.writeFile(filePath, data);
+    return true;
+  } catch {
+    return false;
+  }
 }

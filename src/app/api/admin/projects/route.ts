@@ -4,11 +4,11 @@ import { guard } from "@/lib/cmsAuth";
 import { commitImage, commitProjects, syncEnabled } from "@/lib/githubSync";
 import { getImageSize, slugify } from "@/lib/imageMeta";
 import {
-  readProjects,
+  loadProjects,
+  tryWriteFile,
   writeProjects,
   type StoredProject,
 } from "@/lib/projectsStore";
-import { promises as fs } from "fs";
 import path from "path";
 
 export const dynamic = "force-dynamic";
@@ -18,8 +18,7 @@ const CATEGORIES = ["RESIDENTIAL", "COMMERCIAL", "HOSPITALITY"] as const;
 export async function GET(request: Request) {
   const denied = guard(request);
   if (denied) return denied;
-  // Read from disk so freshly saved projects show up immediately.
-  const projects = await readProjects().catch(() => REAL_PROJECTS);
+  const projects = await loadProjects().catch(() => REAL_PROJECTS);
   return NextResponse.json({
     projects,
     syncEnabled: syncEnabled(),
@@ -53,7 +52,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const projects = await readProjects();
+  const projects = await loadProjects();
   const baseSlug = slugify(str("id") || title);
   let id = baseSlug;
   let n = 2;
@@ -66,9 +65,6 @@ export async function POST(request: Request) {
     (numbers.length ? Math.max(...numbers) : 0) + 1
   ).padStart(2, "0");
 
-  const dir = path.join(process.cwd(), "public", "projects", id);
-  await fs.mkdir(dir, { recursive: true });
-
   const files = form.getAll("images").filter((f): f is File => f instanceof File && f.size > 0);
   if (files.length === 0) {
     return NextResponse.json(
@@ -76,6 +72,7 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   }
+
   const images: StoredProject["allImages"] = [];
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
@@ -94,11 +91,26 @@ export async function POST(request: Request) {
       );
     }
     const safeName = `photo-${String(i + 1).padStart(2, "0")}${extFor(file.type)}`;
-    await fs.writeFile(path.join(dir, safeName), buffer);
+    const localOk = await tryWriteFile(
+      path.join(process.cwd(), "public", "projects", id, safeName),
+      buffer
+    );
+
     if (syncEnabled()) {
       try {
         await commitImage(id, safeName, buffer);
       } catch (err) {
+        // Without a local write the image would be lost entirely — fail hard.
+        if (!localOk) {
+          return NextResponse.json(
+            {
+              error: `Image ${safeName} could not be saved: GitHub sync failed and the hosting filesystem is read-only. ${
+                err instanceof Error ? err.message : String(err)
+              }`,
+            },
+            { status: 502 }
+          );
+        }
         return NextResponse.json(
           {
             error: `Image ${safeName} saved locally but GitHub sync failed: ${
@@ -108,7 +120,16 @@ export async function POST(request: Request) {
           { status: 502 }
         );
       }
+    } else if (!localOk) {
+      return NextResponse.json(
+        {
+          error:
+            "Cannot save images: the hosting filesystem is read-only and GitHub sync is not configured. Set GITHUB_TOKEN (see README).",
+        },
+        { status: 500 }
+      );
     }
+
     images.push({
       id: `${id}-${i + 1}`,
       src: `/projects/${id}/${safeName}`,
@@ -144,18 +165,27 @@ export async function POST(request: Request) {
   };
 
   projects.push(project);
-  await writeProjects(projects);
+  const localSaved = await writeProjects(projects);
 
   let githubError: string | null = null;
   if (syncEnabled()) {
     try {
-      await commitProjects(
-        projects,
-        `CMS: add project "${title}" (${id})`
-      );
+      await commitProjects(projects, `CMS: add project "${title}" (${id})`);
     } catch (err) {
       githubError = err instanceof Error ? err.message : String(err);
     }
+  }
+
+  // Data is only safe if it exists somewhere: locally, or committed to GitHub.
+  if (!localSaved && (!syncEnabled() || githubError)) {
+    return NextResponse.json(
+      {
+        error: githubError
+          ? `Project could not be saved — GitHub sync failed: ${githubError}`
+          : "Project could not be saved: the hosting filesystem is read-only and GitHub sync is not configured.",
+      },
+      { status: githubError ? 502 : 500 }
+    );
   }
 
   return NextResponse.json({
@@ -163,6 +193,7 @@ export async function POST(request: Request) {
     project,
     totalProjects: projects.length,
     syncedToGithub: syncEnabled() && !githubError,
+    savedLocally: localSaved,
     githubError,
   });
 }
@@ -176,13 +207,13 @@ export async function DELETE(request: Request) {
   if (!id) {
     return NextResponse.json({ error: "Missing ?id=." }, { status: 400 });
   }
-  const projects = await readProjects();
+  const projects = await loadProjects();
   const index = projects.findIndex((p) => p.id === id);
   if (index === -1) {
     return NextResponse.json({ error: `Unknown project: ${id}` }, { status: 404 });
   }
   const [removed] = projects.splice(index, 1);
-  await writeProjects(projects);
+  const localSaved = await writeProjects(projects);
 
   let githubError: string | null = null;
   if (syncEnabled()) {
@@ -193,14 +224,23 @@ export async function DELETE(request: Request) {
     }
   }
 
+  if (!localSaved && (!syncEnabled() || githubError)) {
+    return NextResponse.json(
+      {
+        error: githubError
+          ? `Change could not be saved — GitHub sync failed: ${githubError}`
+          : "Change could not be saved: the hosting filesystem is read-only and GitHub sync is not configured.",
+      },
+      { status: githubError ? 502 : 500 }
+    );
+  }
+
   return NextResponse.json({
     ok: true,
-    removedLocalImages: removed.heroImage.startsWith("/projects/"),
-    note: removed.heroImage.startsWith("/projects/")
-      ? `Image folder public/projects/${id}/ kept on disk; delete manually if unwanted (GitHub image deletion is not automated).`
-      : undefined,
+    savedLocally: localSaved,
     syncedToGithub: syncEnabled() && !githubError,
     githubError,
+    note: `Image folder public/projects/${id}/ is kept (GitHub image deletion is not automated); remove it manually in the repo if unwanted.`,
   });
 }
 
