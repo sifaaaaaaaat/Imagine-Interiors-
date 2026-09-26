@@ -5928,32 +5928,5 @@
       }
     ],
     "structuredSpaces": []
-  },
-  {
-    "id": "sync-verification-project",
-    "number": "37",
-    "title": "Sync Verification Project",
-    "client": "—",
-    "location": "Dhaka",
-    "category": "HOSPITALITY",
-    "year": "2026",
-    "area": "—",
-    "synopsis": "Sync Verification Project",
-    "quote": "",
-    "tags": [],
-    "heroImage": "/projects/sync-verification-project/photo-01.jpg",
-    "allImages": [
-      {
-        "id": "sync-verification-project-1",
-        "src": "/projects/sync-verification-project/photo-01.jpg",
-        "originalUrl": "",
-        "title": "sync-test",
-        "room": "",
-        "width": 945,
-        "height": 632,
-        "aspectRatio": "945/632"
-      }
-    ],
-    "structuredSpaces": []
   }
 ]
