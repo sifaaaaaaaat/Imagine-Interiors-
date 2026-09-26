@@ -167,10 +167,13 @@ a `body` array of blocks (`P`, `H2`, `H3`, `H4`, `LI`).
 
 ### Vercel (recommended)
 
-1. Push the repo to GitHub/GitLab.
-2. Import the project in Vercel; framework preset **Next.js** is detected.
-3. (Optional) set `NEXT_PUBLIC_SITE_URL` to the final domain.
-4. Deploy. Static pages and all `/project/*`, `/blog/*` routes prerender.
+**This project is already deployed:** https://imagine-interiors-xi.vercel.app
+
+- Vercel project: `hosen-sifats-projects/imagine-interiors`, connected to this
+  GitHub repository — every push to `main` auto-deploys to production.
+- Environment variables configured on Vercel: `ADMIN_PASSWORD`,
+  `GITHUB_TOKEN` (enables CMS → GitHub sync), `NEXT_PUBLIC_SITE_URL`.
+- To redeploy manually: `npx vercel deploy --prod` from the project root.
 
 ### Any Node host
 
