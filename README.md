@@ -41,8 +41,11 @@ before deployment.
 | Variable                | Required | Purpose                                                    |
 | ----------------------- | -------- | ---------------------------------------------------------- |
 | `NEXT_PUBLIC_SITE_URL`  | No       | Canonical site URL used by sitemap/robots/Open Graph. Falls back to `https://imagineinteriors.design`. |
+| `ADMIN_PASSWORD`        | For CMS  | Password for the `/admin` dashboard (see "Project CMS" below). |
+| `GITHUB_TOKEN`          | No       | Enables "Save to GitHub" from the CMS. Classic token with the `repo` scope. |
+| `GITHUB_OWNER` / `GITHUB_REPO` / `GITHUB_BRANCH` | No | Target repo for CMS sync (defaults to `sifaaaaaaaat` / `Imagine-Interiors-` / `main`). |
 
-No other environment variables, secrets, or API keys are used.
+No other secrets or API keys are used. Copy `.env.example` to `.env.local` to get started.
 
 ## Where Things Live
 
@@ -66,31 +69,69 @@ src/
 │       ├── ProjectMarker.tsx       # Glowing map pins
 │       ├── ProjectCard.tsx         # Compact place-cards
 │       └── ProjectCategoryFilter.tsx
+├── app/
+│   ├── admin/page.tsx      # ⭐ /admin CMS dashboard (password-protected)
+│   └── api/admin/          # CMS API: login, projects list/create/delete
 ├── data/
-│   ├── realProjects.ts     # ⭐ ALL 35 PROJECTS (single source of truth)
+│   ├── projects.json       # ⭐ ALL 35 PROJECTS (single source of truth, CMS-writable)
+│   ├── realProjects.ts     # Typed loader over projects.json (site imports stay stable)
 │   └── siteData.ts         # Blog posts, testimonials, about, contact info, brand logos
 └── lib/
+    ├── cmsAuth.ts          # Admin sessions (password → bearer token)
+    ├── githubSync.ts       # Commits projects.json + images to GitHub via API
+    ├── imageMeta.ts        # Dependency-free JPEG/PNG/WebP dimension sniffing
     └── mapLayout.ts        # Journey geometry + camera math (pure functions)
 
 public/
-├── projects/<project-id>/  # Project photos (JPG, referenced by realProjects.ts)
+├── projects/<project-id>/  # Project photos (JPG, referenced by projects.json)
 ├── brands/                 # Client logo wall (testimonials page)
 └── blog/                   # Blog thumbnails (/blog/) and full heroes (/blog/full/)
 ```
 
 ## How to Add a New Project
 
+### Recommended: the CMS at `/admin`
+
+1. Set `ADMIN_PASSWORD` in `.env.local` (and `GITHUB_TOKEN` to sync to this
+   repo), then open **/admin** and sign in.
+2. Click **+ Add project**, fill the form (only the title is required),
+   pick the photos, and **Save**.
+3. The project appears on the site immediately in dev mode. On Vercel, the
+   commit pushed by the CMS triggers a redeploy automatically (~1–2 min).
+
+The first uploaded image becomes the project cover, dimensions are detected
+automatically, and images land in `public/projects/<project-id>/`.
+
+### Manual: edit the data file
+
 1. Create a folder `public/projects/<new-project-id>/` and put the photos in
    it (JPG recommended; keep each photo < 500 KB).
-2. Open `src/data/realProjects.ts` and append one object to `REAL_PROJECTS`
-   following the existing shape: `id` (must match the folder name), `number`,
-   `title`, `client`, `location`, `category` (`RESIDENTIAL` / `COMMERCIAL` /
-   `HOSPITALITY`), `year`, `area`, `synopsis`, `quote`, `tags`, `heroImage`,
-   `allImages` (each entry: `id`, `src`, `originalUrl`, `title`, `room`,
-   `width`, `height`, `aspectRatio`), and `structuredSpaces`.
+2. Open `src/data/projects.json` and append one object following the existing
+   shape: `id` (must match the folder name), `number`, `title`, `client`,
+   `location`, `category` (`RESIDENTIAL` / `COMMERCIAL` / `HOSPITALITY`),
+   `year`, `area`, `synopsis`, `quote`, `tags`, `heroImage`, `allImages`
+   (each entry: `id`, `src`, `originalUrl`, `title`, `room`, `width`,
+   `height`, `aspectRatio`), and `structuredSpaces`.
 3. That's it. The portfolio map journey, category filters, sitemap, and
    `/project/<id>` detail page (with gallery + lightbox) pick it up
    automatically.
+
+## Project CMS (/admin)
+
+A password-protected dashboard for the client to manage the portfolio without
+touching code.
+
+- **Login**: set `ADMIN_PASSWORD` in `.env.local` (locally) or as an
+  environment variable in the host (production). Sessions are signed-in tokens
+  stored in the browser for the tab session.
+- **Add project**: title + category + photos is enough; synopsis, quote, tags,
+  client, location, year, and area are optional with sensible defaults.
+- **Delete project**: removes it from the site and commits the change; photo
+  files are kept (delete manually if unwanted).
+- **GitHub sync**: with `GITHUB_TOKEN` set, every save/delete commits
+  `src/data/projects.json` and new images straight to this repository —
+  on Vercel this triggers an automatic redeploy. Without a token, changes are
+  saved to the local files only.
 
 ## How to Add / Edit Blog Posts
 
