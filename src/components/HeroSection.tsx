@@ -750,19 +750,25 @@ function WallWithDoorway({
   return (
     <>
       {/* ---- wall plates around the doorway (the hole is what's missing) -- */}
+      {/* Plates OVERLAP by a few px instead of meeting edge-to-edge: during   */}
+      {/* the camera's continuous scale transform, subpixel rounding can open  */}
+      {/* hairline gaps at exact junctions, flashing the black room behind as  */}
+      {/* thin vertical lines at the jambs. Same color, so overlaps are        */}
+      {/* invisible; the 3px poke into the hole tucks under the frame lining   */}
+      {/* and the closed leaf.                                                 */}
       <div
         style={{
           ...stripStyle(),
           left: 0,
           top: 0,
-          width: D.left,
+          width: D.left + 3,
           height: "100%",
         }}
       />
       <div
         style={{
           ...stripStyle(),
-          left: D.left + D.width,
+          left: D.left + D.width - 3,
           top: 0,
           right: 0,
           height: "100%",
@@ -771,19 +777,19 @@ function WallWithDoorway({
       <div
         style={{
           ...stripStyle(),
-          left: D.left,
+          left: D.left - 2,
           top: 0,
-          width: D.width,
+          width: D.width + 4,
           height: D.top,
         }}
       />
       <div
         style={{
           ...stripStyle(),
-          left: D.left,
-          top: D.top + D.height,
-          width: D.width,
-          height: `calc(100% - ${D.top + D.height}px)`,
+          left: D.left - 2,
+          top: D.top + D.height - 3,
+          width: D.width + 4,
+          height: `calc(100% - ${D.top + D.height - 3}px)`,
         }}
       />
 
@@ -862,27 +868,6 @@ function WallWithDoorway({
                 "inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -10px 20px rgba(97,78,55,0.28)",
             }}
           >
-            {/* fluted arched window glowing from behind — same ellipse family */}
-            <div
-              className="absolute"
-              style={{
-                left: "15%",
-                right: "15%",
-                top: "8%",
-                bottom: "8%",
-                borderRadius: `${
-                  (D.width * 0.7) / 2
-                }px ${(D.width * 0.7) / 2}px 4px 4px / ${
-                  D.height * 0.84 * 0.23
-                }px ${D.height * 0.84 * 0.23}px 4px 4px`,
-                background:
-                  "repeating-linear-gradient(90deg, rgba(255,246,224,0.95) 0px, rgba(255,246,224,0.95) 2px, rgba(203,181,148,0.95) 2px, rgba(203,181,148,0.95) 5px)",
-                boxShadow:
-                  "0 0 24px rgba(255,224,160,0.7), inset 0 0 20px rgba(255,236,192,0.85), 0 0 0 2px rgba(120,98,70,0.35)",
-                filter: `brightness(${1 + (isHoveredPill ? 0.12 : 0)})`,
-                transition: "filter 0.3s ease",
-              }}
-            />
             {/* subtle wood-grain sheen on the leaf */}
             <div
               className="absolute inset-0 opacity-40 pointer-events-none"
