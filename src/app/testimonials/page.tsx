@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default function TestimonialsPage() {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-[#E0E0E0] selection:bg-white selection:text-black">
-      <header className="sticky top-0 z-40 w-full bg-[#0A0A0A]/90 backdrop-blur-xl border-b border-white/10 px-5 sm:px-8 lg:px-12 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-40 w-full bg-[#0A0A0A]/90 backdrop-blur-xl border-b border-white/10 px-5 sm:px-8 lg:px-12 py-4 flex flex-wrap items-center justify-between">
         <Link
           href="/"
           className="flex items-center gap-3 text-white font-heading font-bold text-xs tracking-[0.25em] uppercase"

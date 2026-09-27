@@ -21,7 +21,7 @@ export default function SiteNav({
 
   return (
     <nav
-      className={`flex items-center gap-1 sm:gap-2 text-[10px] sm:text-[11px] font-body tracking-[0.18em] uppercase ${
+      className={`flex flex-wrap items-center justify-center gap-1 sm:gap-2 text-[10px] sm:text-[11px] font-body tracking-[0.18em] uppercase ${
         isDark ? "text-[#7A7B7E]" : "text-[#55565A]"
       }`}
     >

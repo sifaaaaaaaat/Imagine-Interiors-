@@ -102,7 +102,7 @@ export default function ProjectDetail({
       {/* ============================================================ */}
       {/* STICKY HEADER NAV                                            */}
       {/* ============================================================ */}
-      <header className="sticky top-0 z-40 w-full bg-[#0A0A0A]/90 backdrop-blur-xl border-b border-white/8 px-5 sm:px-8 lg:px-12 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-40 w-full bg-[#0A0A0A]/90 backdrop-blur-xl border-b border-white/8 px-5 sm:px-8 lg:px-12 py-4 flex flex-wrap items-center justify-between">
         <Link
           href="/"
           className="group flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/8 hover:bg-white text-white hover:text-black border border-white/15 transition-all duration-300 text-xs tracking-[0.16em] uppercase font-semibold"
