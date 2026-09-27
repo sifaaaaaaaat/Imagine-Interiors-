@@ -10,5 +10,17 @@
     "submittedAt": "2026-09-27T14:43:25.726Z",
     "ip": "103.136.107.130",
     "status": "new"
+  },
+  {
+    "id": "1790522542763-b404f8",
+    "name": "QA Review Test",
+    "contact": "qa-test@example.com",
+    "typology": "Apartment / Residence",
+    "location": "—",
+    "message": "Full-review E2E check of the inquiry pipeline. Safe to delete.",
+    "source": "contact-page",
+    "submittedAt": "2026-09-27T15:22:22.764Z",
+    "ip": "::1",
+    "status": "new"
   }
 ]
