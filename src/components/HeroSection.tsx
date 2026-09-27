@@ -868,6 +868,27 @@ function WallWithDoorway({
                 "inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -10px 20px rgba(97,78,55,0.28)",
             }}
           >
+            {/* fluted arched window glowing from behind — same ellipse family */}
+            <div
+              className="absolute"
+              style={{
+                left: "15%",
+                right: "15%",
+                top: "8%",
+                bottom: "8%",
+                borderRadius: `${
+                  (D.width * 0.7) / 2
+                }px ${(D.width * 0.7) / 2}px 4px 4px / ${
+                  D.height * 0.84 * 0.23
+                }px ${D.height * 0.84 * 0.23}px 4px 4px`,
+                background:
+                  "repeating-linear-gradient(90deg, rgba(255,246,224,0.95) 0px, rgba(255,246,224,0.95) 2px, rgba(203,181,148,0.95) 2px, rgba(203,181,148,0.95) 5px)",
+                boxShadow:
+                  "0 0 24px rgba(255,224,160,0.7), inset 0 0 20px rgba(255,236,192,0.85), 0 0 0 2px rgba(120,98,70,0.35)",
+                filter: `brightness(${1 + (isHoveredPill ? 0.12 : 0)})`,
+                transition: "filter 0.3s ease",
+              }}
+            />
             {/* subtle wood-grain sheen on the leaf */}
             <div
               className="absolute inset-0 opacity-40 pointer-events-none"
