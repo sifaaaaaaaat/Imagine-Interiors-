@@ -111,36 +111,6 @@ export default function ContactPage() {
                   <circle cx="12" cy="10" r="2.5" />
                 </svg>
               </a>
-              <span className="text-[10px] font-mono tracking-[0.25em] text-[#777777] uppercase block mb-4 mt-8">
-                FACTORY
-              </span>
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                  CONTACT_INFO.factory
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Open our factory location in Google Maps"
-                title="Open in Google Maps"
-                className="group flex items-start gap-2 text-sm text-[#BBBBBB] font-light leading-relaxed hover:text-white transition-colors"
-              >
-                <span>{CONTACT_INFO.factory}</span>
-                <svg
-                  className="shrink-0 mt-0.5 opacity-40 group-hover:opacity-100 transition-opacity"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden
-                >
-                  <path d="M12 21s-7-5.1-7-11a7 7 0 0 1 14 0c0 5.9-7 11-7 11Z" />
-                  <circle cx="12" cy="10" r="2.5" />
-                </svg>
-              </a>
             </div>
             <div className="p-8 rounded-3xl bg-white/[0.03] border border-white/10">
               <span className="text-[10px] font-mono tracking-[0.25em] text-[#777777] uppercase block mb-4">
