@@ -312,7 +312,7 @@ export default function HeroSection() {
           <div className="absolute inset-0 z-20 flex flex-col justify-between items-center pointer-events-none">
             {/* Subtle Studio Top Header */}
             <header
-              className="relative z-30 w-full px-6 md:px-12 pt-6 md:pt-8 flex items-center justify-between text-[#55565A] pointer-events-auto"
+              className="relative z-30 w-full px-4 sm:px-6 md:px-12 pt-6 md:pt-8 flex items-center justify-between text-[#55565A] pointer-events-auto"
               style={{
                 opacity: uiChromeOpacity,
                 transform: `translateY(${-camera * 40}px)`,
@@ -332,7 +332,7 @@ export default function HeroSection() {
 
               <button
                 onClick={scrollToArchive}
-                className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#55565A]/30 text-xs font-body tracking-[0.16em] uppercase hover:bg-black hover:text-white hover:border-black transition-all duration-300 cursor-pointer"
+                className="flex items-center gap-2 whitespace-nowrap px-3 sm:px-4 py-1.5 rounded-full border border-[#55565A]/30 text-[10px] sm:text-xs font-body tracking-[0.16em] uppercase hover:bg-black hover:text-white hover:border-black transition-all duration-300 cursor-pointer"
               >
                 <span>EXPLORE WORKS</span>
                 <span className="text-[10px]">↘</span>
@@ -361,7 +361,9 @@ export default function HeroSection() {
                 <div
                   className="absolute pointer-events-none"
                   style={{
-                    left: "2.44%",
+                    /* On phones the doorway frame nearly touches these
+                     * letters, so the block tucks a little further out. */
+                    left: stage && stage.vw < 640 ? "0.9%" : "2.44%",
                     top: "23.44%",
                     width: "43.46%",
                     height: "46.01%",
@@ -384,7 +386,7 @@ export default function HeroSection() {
                 <div
                   className="absolute pointer-events-none"
                   style={{
-                    left: "58.59%",
+                    left: stage && stage.vw < 640 ? "60.1%" : "58.59%",
                     top: "23.44%",
                     width: "29.79%",
                     height: "46.01%",
@@ -791,7 +793,9 @@ function WallWithDoorway({
     height: SLOT.height * stage.height,
   };
 
-  const F = 5; // frame inflation around the hole, in px
+  const F = D.width < 60 ? 3 : 5; // frame inflation around the hole, in px —
+  // slimmed on phones so the lining stays clear of the wordmark letters
+  // (their gap to the doorway is only a few px at small stage sizes)
   const EXT = 26; // wall-side extension of the shoulder patch, in px
 
   /* Arch radii in px — shared by leaf, frame and shoulder cutout so every
