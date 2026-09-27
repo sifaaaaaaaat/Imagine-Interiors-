@@ -715,6 +715,20 @@ export const CONTACT_INFO = {
     "SEL Rose-N-Dale, 116, Kazi Nazrul Islam Avenue, Banglamotor, Dhaka 1205",
   factory:
     "Lane 14, Plot 415, Shadhinota Shoroni, Purbanchol, Uttor Badda, Dhaka-1212",
+  /* Social profiles + map links (from imagineinteriors.design/contact).   */
+  /* The Google Maps links point at the official Imagine Interiors listing  */
+  /* (place CID 17944428582829338465 / “Imagine Interiors - Dhaka”), so a   */
+  /* click opens the office location in Google Maps for directions.         */
+  socials: {
+    facebook: "https://www.facebook.com/imagineinteriorsbd/",
+    linkedin: "https://www.linkedin.com/company/imagineinteriors/",
+    instagram: "https://www.instagram.com/imagineinteriors.bd/",
+    youtube: "https://www.youtube.com/@imagineinteriorsbd",
+  },
+  mapsUrl: "https://maps.google.com/?cid=17944428582829338465",
+  /* Google Maps embed of “Imagine Interiors - Dhaka” for the contact page. */
+  mapsEmbed:
+    "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3652.0712812767474!2d90.39350061498128!3d23.744837384592156!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755b9aa09fce21d%3A0xf9076ab8f0e8af61!2sImagine%20Interiors%20-%20Dhaka!5e0!3m2!1sen!2sin!4v1659704359971!5m2!1sen!2sin",
 };
 
 export const ABOUT = {
