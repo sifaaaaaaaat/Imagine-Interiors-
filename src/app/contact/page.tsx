@@ -8,6 +8,8 @@ import { CONTACT_INFO } from "@/data/siteData";
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState("");
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-[#E0E0E0] selection:bg-white selection:text-black">
@@ -194,18 +196,61 @@ export default function ContactPage() {
                 </p>
 
                 <form
-                  onSubmit={(e) => {
+                  onSubmit={async (e) => {
                     e.preventDefault();
-                    setSubmitted(true);
+                    if (sending) return;
+                    const fd = new FormData(e.currentTarget);
+                    setSending(true);
+                    setSendError("");
+                    try {
+                      const res = await fetch("/api/inquiries", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          name: fd.get("name"),
+                          contact: fd.get("contact"),
+                          typology: fd.get("typology"),
+                          location: fd.get("location"),
+                          message: fd.get("message"),
+                          company: fd.get("company"),
+                          source: "contact-page",
+                        }),
+                      });
+                      const data = await res.json().catch(() => ({}));
+                      if (!res.ok || !data.ok) {
+                        setSendError(
+                          data.error ??
+                            "Could not send right now — please call or WhatsApp us instead."
+                        );
+                        return;
+                      }
+                      setSubmitted(true);
+                    } catch {
+                      setSendError(
+                        "Network error — please call or WhatsApp us instead."
+                      );
+                    } finally {
+                      setSending(false);
+                    }
                   }}
                   className="space-y-4"
                 >
+                  {/* Honeypot — hidden from humans, catches spam bots. */}
+                  <input
+                    type="text"
+                    name="company"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    className="hidden"
+                  />
                   <div>
                     <label className="block text-[11px] font-mono tracking-widest text-[#888888] uppercase mb-1">
                       Your Name
                     </label>
                     <input
                       type="text"
+                      name="name"
                       required
                       placeholder="e.g. Mrs. Sen / Mr. Fahad"
                       className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-white/40"
@@ -218,6 +263,7 @@ export default function ContactPage() {
                     </label>
                     <input
                       type="text"
+                      name="contact"
                       required
                       placeholder="01712 664168 / client@mail.com"
                       className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-white/40"
@@ -229,7 +275,10 @@ export default function ContactPage() {
                       <label className="block text-[11px] font-mono tracking-widest text-[#888888] uppercase mb-1">
                         Typology
                       </label>
-                      <select className="w-full px-3 py-2.5 rounded-xl bg-[#222222] border border-white/10 text-sm text-white focus:outline-none focus:border-white/40">
+                      <select
+                      name="typology"
+                      className="w-full px-3 py-2.5 rounded-xl bg-[#222222] border border-white/10 text-sm text-white focus:outline-none focus:border-white/40"
+                    >
                         <option>Apartment / Residence</option>
                         <option>Duplex Interior Design</option>
                         <option>Office Space</option>
@@ -242,11 +291,12 @@ export default function ContactPage() {
                       <label className="block text-[11px] font-mono tracking-widest text-[#888888] uppercase mb-1">
                         Location
                       </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Banani, Uttara, Kushtia"
-                        className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-white/40"
-                      />
+                    <input
+                      type="text"
+                      name="location"
+                      placeholder="e.g. Banani, Uttara, Kushtia"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-white/40"
+                    />
                     </div>
                   </div>
 
@@ -255,17 +305,26 @@ export default function ContactPage() {
                       Spatial Scope &amp; Requirements
                     </label>
                     <textarea
+                      name="message"
                       rows={4}
+                      required
                       placeholder="Describe your space, square footage, and timeline..."
                       className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-white/40 resize-none"
                     />
                   </div>
 
+                  {sendError && (
+                    <p className="text-xs text-red-400 bg-red-950/40 border border-red-900/50 rounded-lg px-3 py-2">
+                      {sendError}
+                    </p>
+                  )}
+
                   <button
                     type="submit"
-                    className="w-full py-3.5 rounded-xl bg-white text-black font-heading font-bold text-xs tracking-[0.2em] uppercase hover:bg-[#E0E0E0] transition-colors mt-2 cursor-pointer"
+                    disabled={sending}
+                    className="w-full py-3.5 rounded-xl bg-white text-black font-heading font-bold text-xs tracking-[0.2em] uppercase hover:bg-[#E0E0E0] transition-colors mt-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    SEND INQUIRY
+                    {sending ? "SENDING…" : "SEND INQUIRY"}
                   </button>
                 </form>
               </>

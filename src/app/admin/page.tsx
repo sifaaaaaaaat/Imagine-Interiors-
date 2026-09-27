@@ -27,6 +27,18 @@ interface Project {
   allImages: ProjectImage[];
 }
 
+interface Inquiry {
+  id: string;
+  name: string;
+  contact: string;
+  typology: string;
+  location: string;
+  message: string;
+  source: string;
+  submittedAt: string;
+  status: "new" | "handled";
+}
+
 const EMPTY_FORM = {
   title: "",
   client: "",
@@ -46,6 +58,10 @@ export default function AdminPage() {
   const [loginError, setLoginError] = useState("");
   const [projects, setProjects] = useState<Project[] | null>(null);
   const [syncEnabled, setSyncEnabled] = useState(false);
+  const [tab, setTab] = useState<"projects" | "inquiries">("projects");
+  const [inquiries, setInquiries] = useState<Inquiry[] | null>(null);
+  const [inquiriesSync, setInquiriesSync] = useState(false);
+  const [busyInquiry, setBusyInquiry] = useState<string | null>(null);
   const [banner, setBanner] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -65,6 +81,22 @@ export default function AdminPage() {
     const data = await res.json();
     return {
       projects: (data.projects ?? []) as Project[],
+      syncEnabled: Boolean(data.syncEnabled),
+    };
+  }, []);
+
+  const fetchInquiries = useCallback(async (t: string) => {
+    const res = await fetch("/api/admin/inquiries", {
+      headers: { Authorization: `Bearer ${t}` },
+    });
+    if (res.status === 401) {
+      sessionStorage.removeItem("cms-token");
+      setToken(null);
+      throw new Error("Session expired — sign in again.");
+    }
+    const data = await res.json();
+    return {
+      inquiries: (data.inquiries ?? []) as Inquiry[],
       syncEnabled: Boolean(data.syncEnabled),
     };
   }, []);
@@ -89,6 +121,16 @@ export default function AdminPage() {
               if (cancelled) return;
               setBanner({ kind: "err", text: "Could not reach the API." });
             });
+          fetchInquiries(stored)
+            .then((data) => {
+              if (cancelled) return;
+              setInquiries(data.inquiries);
+              setInquiriesSync(data.syncEnabled);
+            })
+            .catch(() => {
+              if (cancelled) return;
+              setBanner({ kind: "err", text: "Could not reach the API." });
+            });
         }
       })
       .catch(() => {
@@ -99,7 +141,7 @@ export default function AdminPage() {
     return () => {
       cancelled = true;
     };
-  }, [fetchProjects]);
+  }, [fetchProjects, fetchInquiries]);
 
   async function login(e: React.FormEvent) {
     e.preventDefault();
@@ -125,6 +167,14 @@ export default function AdminPage() {
       .catch(() => {
         setBanner({ kind: "err", text: "Could not reach the API." });
       });
+    fetchInquiries(data.token)
+      .then((refreshed) => {
+        setInquiries(refreshed.inquiries);
+        setInquiriesSync(refreshed.syncEnabled);
+      })
+      .catch(() => {
+        setBanner({ kind: "err", text: "Could not reach the API." });
+      });
   }
 
   function logout() {
@@ -135,6 +185,74 @@ export default function AdminPage() {
     sessionStorage.removeItem("cms-token");
     setToken(null);
     setProjects(null);
+    setInquiries(null);
+  }
+
+  async function setInquiryStatus(i: Inquiry, status: "new" | "handled") {
+    if (!token) return;
+    setBusyInquiry(i.id);
+    setBanner(null);
+    try {
+      const res = await fetch(
+        `/api/admin/inquiries?id=${encodeURIComponent(i.id)}`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) {
+        setBanner({ kind: "err", text: data.error ?? "Update failed." });
+        return;
+      }
+      setInquiries((list) =>
+        (list ?? []).map((x) => (x.id === i.id ? { ...x, status } : x))
+      );
+      if (data.syncedToGithub === false) {
+        setBanner({ kind: "err", text: "Saved locally but GitHub sync failed." });
+      }
+    } catch (err) {
+      setBanner({
+        kind: "err",
+        text: err instanceof Error ? err.message : "Update failed.",
+      });
+    } finally {
+      setBusyInquiry(null);
+    }
+  }
+
+  async function deleteInquiry(i: Inquiry) {
+    if (!token) return;
+    if (!window.confirm(`Delete the inquiry from "${i.name}"? This is permanent.`))
+      return;
+    setBusyInquiry(i.id);
+    setBanner(null);
+    try {
+      const res = await fetch(
+        `/api/admin/inquiries?id=${encodeURIComponent(i.id)}`,
+        { method: "DELETE", headers: { Authorization: `Bearer ${token}` } }
+      );
+      const data = await res.json();
+      if (!res.ok) {
+        setBanner({ kind: "err", text: data.error ?? "Delete failed." });
+        return;
+      }
+      setInquiries((list) => (list ?? []).filter((x) => x.id !== i.id));
+      if (data.syncedToGithub === false) {
+        setBanner({ kind: "err", text: "Saved locally but GitHub sync failed." });
+      }
+    } catch (err) {
+      setBanner({
+        kind: "err",
+        text: err instanceof Error ? err.message : "Delete failed.",
+      });
+    } finally {
+      setBusyInquiry(null);
+    }
   }
 
   async function saveProject(e: React.FormEvent) {
@@ -288,6 +406,8 @@ GITHUB_BRANCH=main`}
     COMMERCIAL: list.filter((p) => p.category === "COMMERCIAL").length,
     HOSPITALITY: list.filter((p) => p.category === "HOSPITALITY").length,
   };
+  const inquiryList = inquiries ?? [];
+  const newInquiryCount = inquiryList.filter((i) => i.status === "new").length;
 
   return (
     <main className="min-h-screen bg-neutral-950 text-neutral-200">
@@ -315,12 +435,14 @@ GITHUB_BRANCH=main`}
             >
               {syncEnabled ? "GitHub sync on" : "Local saves only"}
             </span>
-            <button
-              onClick={() => setShowForm((v) => !v)}
-              className="rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-medium px-4 py-2 text-sm transition-colors"
-            >
-              {showForm ? "Close form" : "+ Add project"}
-            </button>
+            {tab === "projects" && (
+              <button
+                onClick={() => setShowForm((v) => !v)}
+                className="rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-medium px-4 py-2 text-sm transition-colors"
+              >
+                {showForm ? "Close form" : "+ Add project"}
+              </button>
+            )}
             <button
               onClick={logout}
               className="rounded-lg border border-neutral-700 hover:border-neutral-500 px-4 py-2 text-sm text-neutral-300 transition-colors"
@@ -329,6 +451,34 @@ GITHUB_BRANCH=main`}
             </button>
           </div>
         </header>
+
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => setTab("projects")}
+            className={`rounded-lg px-4 py-2 text-sm transition-colors ${
+              tab === "projects"
+                ? "bg-neutral-800 text-white border border-neutral-700"
+                : "text-neutral-400 hover:text-neutral-200 border border-transparent"
+            }`}
+          >
+            Projects ({list.length})
+          </button>
+          <button
+            onClick={() => setTab("inquiries")}
+            className={`rounded-lg px-4 py-2 text-sm transition-colors flex items-center gap-2 ${
+              tab === "inquiries"
+                ? "bg-neutral-800 text-white border border-neutral-700"
+                : "text-neutral-400 hover:text-neutral-200 border border-transparent"
+            }`}
+          >
+            Inquiries
+            {newInquiryCount > 0 && (
+              <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-amber-500 text-black text-[11px] font-semibold">
+                {newInquiryCount}
+              </span>
+            )}
+          </button>
+        </div>
 
         {banner && (
           <div
@@ -351,6 +501,8 @@ GITHUB_BRANCH=main`}
           </div>
         )}
 
+        {tab === "projects" && (
+          <>
         {showForm && (
           <form
             onSubmit={saveProject}
@@ -476,6 +628,108 @@ GITHUB_BRANCH=main`}
               </li>
             ))}
           </ul>
+        )}
+          </>
+        )}
+
+        {tab === "inquiries" && (
+          <div className="space-y-3">
+            <p className="text-xs text-neutral-500">
+              {inquiries === null
+                ? "Loading inquiries…"
+                : `${inquiryList.length} total · ${newInquiryCount} new · from the contact page and the hero commission drawer`}
+              {inquiriesSync ? " · committed to GitHub automatically" : ""}
+            </p>
+            {inquiries !== null && inquiryList.length === 0 && (
+              <div className="rounded-xl border border-neutral-800 bg-neutral-900/40 p-8 text-center text-sm text-neutral-500">
+                No inquiries yet. Messages submitted through the contact page and
+                the commission drawer will appear here.
+              </div>
+            )}
+            {inquiryList
+              .slice()
+              .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
+              .map((i) => (
+                <div
+                  key={i.id}
+                  className={`rounded-xl border p-4 transition-colors ${
+                    i.status === "new"
+                      ? "border-amber-700/50 bg-amber-950/10"
+                      : "border-neutral-800 bg-neutral-900/40"
+                  }`}
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-medium text-neutral-100">
+                          {i.name}
+                        </span>
+                        {i.status === "new" && (
+                          <span className="text-[10px] uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-700/50 rounded-full px-2 py-0.5">
+                            New
+                          </span>
+                        )}
+                        <span className="text-[10px] uppercase tracking-wider text-neutral-500 border border-neutral-700 rounded-full px-2 py-0.5">
+                          {i.source === "hero-drawer" ? "Hero drawer" : "Contact page"}
+                        </span>
+                      </div>
+                      <p className="text-xs text-neutral-500 mt-1">
+                        {new Date(i.submittedAt).toLocaleString()} · {i.typology} · {i.location}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {i.status === "new" ? (
+                        <button
+                          onClick={() => setInquiryStatus(i, "handled")}
+                          disabled={busyInquiry === i.id}
+                          className="rounded-lg border border-emerald-800 hover:border-emerald-600 text-emerald-400 px-3 py-1.5 text-xs transition-colors disabled:opacity-50"
+                        >
+                          {busyInquiry === i.id ? "…" : "Mark handled"}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => setInquiryStatus(i, "new")}
+                          disabled={busyInquiry === i.id}
+                          className="rounded-lg border border-neutral-700 hover:border-neutral-500 text-neutral-400 px-3 py-1.5 text-xs transition-colors disabled:opacity-50"
+                        >
+                          {busyInquiry === i.id ? "…" : "Reopen"}
+                        </button>
+                      )}
+                      <a
+                        href={
+                          /@/.test(i.contact) && !/\s/.test(i.contact.trim())
+                            ? `mailto:${i.contact}`
+                            : `tel:${i.contact.replace(/\s/g, "")}`
+                        }
+                        className="rounded-lg border border-neutral-700 hover:border-neutral-500 px-3 py-1.5 text-xs text-neutral-300 transition-colors"
+                      >
+                        Reply
+                      </a>
+                      <button
+                        onClick={() => deleteInquiry(i)}
+                        disabled={busyInquiry === i.id}
+                        className="rounded-lg border border-neutral-800 hover:border-red-800 hover:text-red-400 text-neutral-500 px-3 py-1.5 text-xs transition-colors disabled:opacity-50"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                  <a
+                    href={
+                      /@/.test(i.contact) && !/\s/.test(i.contact.trim())
+                        ? `mailto:${i.contact}`
+                        : `tel:${i.contact.replace(/\s/g, "")}`
+                    }
+                    className="inline-block mt-3 text-sm text-amber-400/90 hover:text-amber-300"
+                  >
+                    {i.contact}
+                  </a>
+                  <p className="mt-2 text-sm text-neutral-300 whitespace-pre-wrap leading-relaxed">
+                    {i.message}
+                  </p>
+                </div>
+              ))}
+          </div>
         )}
       </div>
     </main>

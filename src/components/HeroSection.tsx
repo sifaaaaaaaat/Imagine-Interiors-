@@ -70,6 +70,8 @@ export default function HeroSection() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [contactDrawerOpen, setContactDrawerOpen] = useState(false);
   const [isContactSubmitted, setIsContactSubmitted] = useState(false);
+  const [isSendingContact, setIsSendingContact] = useState(false);
+  const [contactSendError, setContactSendError] = useState("");
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isHoveredPill, setIsHoveredPill] = useState(false);
 
@@ -610,18 +612,61 @@ export default function HeroSection() {
               </div>
             ) : (
               <form
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
-                  setIsContactSubmitted(true);
+                  if (isSendingContact) return;
+                  const fd = new FormData(e.currentTarget);
+                  setIsSendingContact(true);
+                  setContactSendError("");
+                  try {
+                    const res = await fetch("/api/inquiries", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        name: fd.get("name"),
+                        contact: fd.get("contact"),
+                        typology: fd.get("typology"),
+                        location: fd.get("location"),
+                        message: fd.get("message"),
+                        company: fd.get("company"),
+                        source: "hero-drawer",
+                      }),
+                    });
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok || !data.ok) {
+                      setContactSendError(
+                        data.error ??
+                          "Could not send right now — please call or WhatsApp us instead."
+                      );
+                      return;
+                    }
+                    setIsContactSubmitted(true);
+                  } catch {
+                    setContactSendError(
+                      "Network error — please call or WhatsApp us instead."
+                    );
+                  } finally {
+                    setIsSendingContact(false);
+                  }
                 }}
                 className="space-y-4"
               >
+                {/* Honeypot — hidden from humans, catches spam bots. */}
+                <input
+                  type="text"
+                  name="company"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  className="hidden"
+                />
                 <div>
                   <label className="block text-[11px] font-mono tracking-widest text-[#888888] uppercase mb-1">
                     Your Name
                   </label>
                   <input
                     type="text"
+                    name="name"
                     required
                     placeholder="e.g. Asfacuzzaman Sohel / Mrs. Sen"
                     className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-white/40"
@@ -634,6 +679,7 @@ export default function HeroSection() {
                   </label>
                   <input
                     type="text"
+                    name="contact"
                     required
                     placeholder="01712 664168 / client@mail.com"
                     className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-white/40"
@@ -645,7 +691,10 @@ export default function HeroSection() {
                     <label className="block text-[11px] font-mono tracking-widest text-[#888888] uppercase mb-1">
                       Typology
                     </label>
-                    <select className="w-full px-3 py-2.5 rounded-xl bg-[#222222] border border-white/10 text-sm text-white focus:outline-none focus:border-white/40">
+                    <select
+                      name="typology"
+                      className="w-full px-3 py-2.5 rounded-xl bg-[#222222] border border-white/10 text-sm text-white focus:outline-none focus:border-white/40"
+                    >
                       <option>Duplex Interior Design</option>
                       <option>Luxury Apartment / Residence</option>
                       <option>Penthouse Living</option>
@@ -659,6 +708,7 @@ export default function HeroSection() {
                     </label>
                     <input
                       type="text"
+                      name="location"
                       placeholder="e.g. Banani, Uttara, Kushtia"
                       className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-white/40"
                     />
@@ -670,17 +720,28 @@ export default function HeroSection() {
                     Spatial Scope & Requirements
                   </label>
                   <textarea
+                    name="message"
                     rows={3}
+                    required
                     placeholder="Describe your space, square footage, and timeline..."
                     className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-white/40 resize-none"
                   />
                 </div>
 
+                {contactSendError && (
+                  <p className="text-xs text-red-400 bg-red-950/40 border border-red-900/50 rounded-lg px-3 py-2">
+                    {contactSendError}
+                  </p>
+                )}
+
                 <button
                   type="submit"
-                  className="w-full py-3.5 rounded-xl bg-white text-black font-heading font-bold text-xs tracking-[0.2em] uppercase hover:bg-[#E0E0E0] transition-colors mt-2 cursor-pointer"
+                  disabled={isSendingContact}
+                  className="w-full py-3.5 rounded-xl bg-white text-black font-heading font-bold text-xs tracking-[0.2em] uppercase hover:bg-[#E0E0E0] transition-colors mt-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  TRANSMIT COMMISSION BRIEF
+                  {isSendingContact
+                    ? "TRANSMITTING…"
+                    : "TRANSMIT COMMISSION BRIEF"}
                 </button>
               </form>
             )}
