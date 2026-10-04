@@ -919,7 +919,15 @@ function WallWithDoorway({
             transformStyle: "preserve-3d",
             backfaceVisibility: "hidden",
             willChange: "transform",
-            filter: "drop-shadow(0 10px 16px rgba(70,52,30,0.3))",
+            // The drop-shadow spills soft dark bands onto the wall beside/below
+            // the doorway — proportionally huge next to the small phone door
+            // (read as "two black wavy lines"). On small doors swap it for a
+            // no-op filter: paints nothing but keeps the identical flattening /
+            // backface behaviour, so the scroll animation is untouched.
+            filter:
+              D.width < 60
+                ? "blur(0px)"
+                : "drop-shadow(0 10px 16px rgba(70,52,30,0.3))",
           }}
         >
           {/* leaf face — beige panel with backlit fluted arch */}
@@ -959,7 +967,11 @@ function WallWithDoorway({
               className="absolute inset-0 opacity-40 pointer-events-none"
               style={{
                 background:
-                  "repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0 3px, rgba(120,95,65,0.05) 3px 6px)",
+                  // 5px period — must MATCH the fluted-glass stripes behind it.
+                  // A mismatched period (was 3px/6px) superimposes two stripe
+                  // patterns that beat every 30px, painting 2–3 wide wavy dark
+                  // bands across the glass (the "two black lines").
+                  "repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0 2px, rgba(120,95,65,0.05) 2px 5px)",
               }}
             />
             {/* recessed panel outlines, like the reference wall */}
