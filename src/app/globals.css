@@ -18,8 +18,9 @@
   clip-path: path(
     "M12 0C5.4 0 0 5.4 0 12c0 8.2 9.5 17.2 10.9 18.5a1.6 1.6 0 0 0 2.2 0C14.5 29.2 24 20.2 24 12c0-6.6-5.4-12-12-12Zm0 16.8a4.9 4.9 0 1 1 0-9.8 4.9 4.9 0 0 1 0 9.8Z"
   );
-  filter: drop-shadow(0 0 6px rgba(234, 179, 8, 0.55))
-    drop-shadow(0 0 16px rgba(234, 179, 8, 0.35));
+  /* Soft neutral drop so pins lift off the paper map (color itself comes
+   * from the component's blue/red gradient). */
+  filter: drop-shadow(0 3px 4px rgba(70, 52, 30, 0.3));
 }
 
 @keyframes markerPulse {

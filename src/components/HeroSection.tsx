@@ -258,7 +258,7 @@ export default function HeroSection() {
                   willChange: "transform, opacity",
                 }}
               >
-                <span className="text-[10px] sm:text-xs font-mono tracking-[0.18em] sm:tracking-[0.3em] text-[#888888] uppercase block mb-3 max-w-full">
+                <span className="text-[10px] sm:text-xs font-mono tracking-[0.18em] sm:tracking-[0.3em] text-[#7A7468] uppercase block mb-3 max-w-full">
                   IMAGINE INTERIORS · ARCHITECTURAL ARCHIVE
                 </span>
                 <h2 className="text-4xl sm:text-6xl md:text-7xl font-heading font-extrabold text-white tracking-tight">
@@ -434,7 +434,7 @@ export default function HeroSection() {
                 </svg>
               </div>
 
-              <div className="hidden sm:flex items-center gap-4 text-[#888888]">
+              <div className="hidden sm:flex items-center gap-4 text-[#7A7468]">
                 <span>RESIDENTIAL</span>
                 <span>·</span>
                 <span>DUPLEX</span>
@@ -455,15 +455,15 @@ export default function HeroSection() {
       {/* ===================================================================== */}
       <main
         id="archive-section"
-        className="relative z-30 w-full min-h-screen bg-black text-[#E0E0E0] pb-32"
+        className="relative z-30 w-full min-h-screen bg-[#F4F1E9] text-[#232323] pb-32"
       >
         {/* Arrival navigation bar — scrolls away as the map journey begins
             (the explorer carries its own chrome from here on). */}
-        <header className="relative z-40 w-full bg-black px-4 sm:px-8 lg:px-12 py-4 flex items-center justify-between">
+        <header className="relative z-40 w-full bg-[#F4F1E9] px-4 sm:px-8 lg:px-12 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={scrollToHero}
-              className="group flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/10 hover:bg-white text-white hover:text-black border border-white/20 transition-all duration-300 text-xs tracking-[0.16em] uppercase font-semibold cursor-pointer"
+              className="group flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/80 hover:bg-white text-[#232323] border border-[#DDD6C6] hover:border-[#B9AE97] transition-all duration-300 text-xs tracking-[0.16em] uppercase font-semibold cursor-pointer"
             >
               <svg
                 className="w-3.5 h-3.5 transform group-hover:-translate-x-1 transition-transform"
@@ -481,7 +481,7 @@ export default function HeroSection() {
               <span>BACK TO HERO</span>
             </button>
 
-            <div className="hidden lg:flex items-center gap-2 text-xs font-mono tracking-widest text-[#888888] pl-2">
+            <div className="hidden lg:flex items-center gap-2 text-xs font-mono tracking-widest text-[#7A7468] pl-2">
               <span>/</span>
               <span>PROJECT ARCHIVE</span>
               <span>({REAL_PROJECTS.length} PROJECTS)</span>
@@ -489,14 +489,14 @@ export default function HeroSection() {
           </div>
 
           <div className="hidden lg:flex items-center absolute left-1/2 -translate-x-1/2">
-            <SiteNav variant="dark" />
+            <SiteNav variant="light" />
           </div>
 
           {/* Commission Action Button */}
           <div className="hidden sm:flex items-center gap-3">
             <button
               onClick={() => setContactDrawerOpen(true)}
-              className="px-5 py-2 rounded-full text-xs font-heading font-medium tracking-[0.2em] uppercase bg-white text-black hover:bg-[#E0E0E0] transition-colors shadow-lg cursor-pointer"
+              className="px-5 py-2 rounded-full text-xs font-heading font-medium tracking-[0.2em] uppercase bg-[#232323] text-white hover:bg-black transition-colors shadow-lg cursor-pointer"
             >
               COMMISSION A SPACE
             </button>
@@ -510,14 +510,14 @@ export default function HeroSection() {
 
         {/* Bottom Editorial Summary */}
         <section className="mt-28 max-w-6xl mx-auto px-6 text-center">
-          <div className="p-8 sm:p-12 rounded-[36px] bg-gradient-to-b from-[#151515] to-[#0B0B0B] border border-white/10">
-            <span className="text-xs font-mono tracking-[0.25em] text-[#888888] uppercase block mb-3">
+          <div className="p-8 sm:p-12 rounded-[36px] bg-white border border-[#DDD6C6] shadow-[0_30px_70px_rgba(96,78,45,0.12)]">
+            <span className="text-xs font-mono tracking-[0.25em] text-[#7A7468] uppercase block mb-3">
               {REAL_PROJECTS.length} VERIFIED ARCHITECTURAL COMMISSIONS
             </span>
-            <h3 className="text-2xl sm:text-4xl font-heading font-extrabold text-white tracking-tight">
+            <h3 className="text-2xl sm:text-4xl font-heading font-extrabold text-[#232323] tracking-tight">
               SPATIAL EXPERTISE & CRAFTSMANSHIP
             </h3>
-            <p className="mt-4 text-[#8E8E8E] text-sm sm:text-base max-w-2xl mx-auto font-light">
+            <p className="mt-4 text-[#7A7468] text-sm sm:text-base max-w-2xl mx-auto font-light">
               From compact urban residences in Mirpur and Banani to sweeping
               double-height duplexes in Kushtia, we design with monolithic
               materials, natural illumination, and timeless proportions.
@@ -526,13 +526,13 @@ export default function HeroSection() {
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
                 onClick={() => setContactDrawerOpen(true)}
-                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-white text-black font-heading font-bold text-xs tracking-[0.22em] uppercase hover:bg-[#E0E0E0] transition-colors shadow-lg cursor-pointer"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#232323] text-white font-heading font-bold text-xs tracking-[0.22em] uppercase hover:bg-black transition-colors shadow-lg cursor-pointer"
               >
                 START YOUR PROJECT BRIEF
               </button>
               <button
                 onClick={scrollToHero}
-                className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-white/5 hover:bg-white/10 text-white border border-white/15 text-xs font-heading tracking-[0.22em] uppercase transition-colors cursor-pointer"
+                className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-white/70 hover:bg-white text-[#232323] border border-[#DDD6C6] text-xs font-heading tracking-[0.22em] uppercase transition-colors cursor-pointer"
               >
                 ← RETURN TO HERO
               </button>
@@ -541,7 +541,7 @@ export default function HeroSection() {
         </section>
 
         {/* Archive Footer */}
-        <footer className="mt-20 pt-8 border-t border-white/10 max-w-7xl mx-auto px-6 md:px-12 flex flex-col sm:flex-row items-center justify-between text-[11px] font-mono text-[#666666] tracking-widest uppercase gap-4">
+        <footer className="mt-20 pt-8 border-t border-[#DDD6C6] max-w-7xl mx-auto px-6 md:px-12 flex flex-col sm:flex-row items-center justify-between text-[11px] font-mono text-[#7A7468] tracking-widest uppercase gap-4">
           <div>IMAGINE INTERIORS DESIGN PRACTICE © 2026</div>
           <div className="flex items-center gap-4 min-w-0 flex-wrap">
             <span>BANANI</span>
@@ -556,7 +556,7 @@ export default function HeroSection() {
           </div>
           <button
             onClick={scrollToHero}
-            className="text-white hover:underline cursor-pointer"
+            className="text-[#1F5E96] hover:underline cursor-pointer"
           >
             RETURN TO TOP ↑
           </button>
@@ -579,13 +579,13 @@ export default function HeroSection() {
               ✕
             </button>
 
-            <span className="text-xs font-mono tracking-[0.25em] text-[#888888] uppercase block mb-2">
+            <span className="text-xs font-mono tracking-[0.25em] text-[#7A7468] uppercase block mb-2">
               COMMISSION INQUIRY
             </span>
             <h3 className="text-2xl sm:text-3xl font-heading font-bold">
               Commission Imagine Interiors
             </h3>
-            <p className="text-xs sm:text-sm text-[#888888] mt-2 mb-6">
+            <p className="text-xs sm:text-sm text-[#7A7468] mt-2 mb-6">
               Share details regarding your apartment, duplex, or commercial
               project. Our principal team will contact you within 24 hours.
             </p>
@@ -663,7 +663,7 @@ export default function HeroSection() {
                   className="hidden"
                 />
                 <div>
-                  <label className="block text-[11px] font-mono tracking-widest text-[#888888] uppercase mb-1">
+                  <label className="block text-[11px] font-mono tracking-widest text-[#7A7468] uppercase mb-1">
                     Your Name
                   </label>
                   <input
@@ -676,7 +676,7 @@ export default function HeroSection() {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-mono tracking-widest text-[#888888] uppercase mb-1">
+                  <label className="block text-[11px] font-mono tracking-widest text-[#7A7468] uppercase mb-1">
                     Phone / Email Address
                   </label>
                   <input
@@ -690,7 +690,7 @@ export default function HeroSection() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[11px] font-mono tracking-widest text-[#888888] uppercase mb-1">
+                    <label className="block text-[11px] font-mono tracking-widest text-[#7A7468] uppercase mb-1">
                       Typology
                     </label>
                     <select
@@ -705,7 +705,7 @@ export default function HeroSection() {
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-mono tracking-widest text-[#888888] uppercase mb-1">
+                    <label className="block text-[11px] font-mono tracking-widest text-[#7A7468] uppercase mb-1">
                       Location
                     </label>
                     <input
@@ -718,7 +718,7 @@ export default function HeroSection() {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-mono tracking-widest text-[#888888] uppercase mb-1">
+                  <label className="block text-[11px] font-mono tracking-widest text-[#7A7468] uppercase mb-1">
                     Spatial Scope & Requirements
                   </label>
                   <textarea

@@ -3,10 +3,10 @@
 import React from "react";
 import type { MapLayout } from "@/lib/mapLayout";
 
-/* The abstract map: a single SVG in WORLD coordinates holding the gold route
- * (glow underlay + crisp line + animated dash) and per-stop location rings.
- * Everything pans under the camera with pure transforms — no tiles, no
- * geography, just an elegant journey line. */
+/* The journey route: a single SVG in WORLD coordinates. Re-themed to read as
+ * a turn-by-turn route printed on the paper city map — white casing under a
+ * warm amber line with a flowing dash, plus per-stop target rings (soft blue
+ * for upcoming stops, red for the active one, mirroring the pins). */
 export default function MapRoute({
   layout,
   activeIndex,
@@ -26,33 +26,30 @@ export default function MapRoute({
       aria-hidden
     >
       <defs>
-        <linearGradient id="routeGold" x1="0" y1="0" x2={world.w} y2={world.h} gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#8a6a1d" />
-          <stop offset="0.35" stopColor="#EAB308" />
-          <stop offset="0.7" stopColor="#F5D878" />
-          <stop offset="1" stopColor="#B7891F" />
+        <linearGradient id="routeAmber" x1="0" y1="0" x2={world.w} y2={world.h} gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#D97B2A" />
+          <stop offset="0.35" stopColor="#E8944A" />
+          <stop offset="0.7" stopColor="#E8944A" />
+          <stop offset="1" stopColor="#C96F24" />
         </linearGradient>
-        <filter id="routeGlow" x="-40%" y="-40%" width="180%" height="180%">
-          <feGaussianBlur stdDeviation="7" />
-        </filter>
       </defs>
 
-      {/* soft glow underlay */}
-      <path d={pathD} stroke="url(#routeGold)" strokeWidth="7" strokeLinecap="round" filter="url(#routeGlow)" opacity="0.5" />
-      {/* crisp route line */}
-      <path d={pathD} stroke="url(#routeGold)" strokeWidth="2" strokeLinecap="round" opacity="0.95" />
+      {/* white casing lifts the route off the printed roads */}
+      <path d={pathD} stroke="#FFFFFF" strokeWidth="11" strokeLinecap="round" opacity="0.95" />
+      {/* amber route line */}
+      <path d={pathD} stroke="url(#routeAmber)" strokeWidth="6.5" strokeLinecap="round" opacity="0.95" />
       {/* flowing dash hinting direction of travel */}
       <path
         d={pathD}
-        stroke="#FFF3C4"
-        strokeWidth="1.4"
+        stroke="#FFFFFF"
+        strokeWidth="2.2"
         strokeLinecap="round"
-        strokeDasharray="2 30"
+        strokeDasharray="2 26"
         className="route-dash"
-        opacity="0.7"
+        opacity="0.85"
       />
 
-      {/* location rings drawn on the route under each pin */}
+      {/* target rings under each pin — like the red target in the reference */}
       {stops.map((s, i) => {
         const active = i === activeIndex;
         return (
@@ -62,9 +59,9 @@ export default function MapRoute({
             cy={s.pos.y}
             rx={active ? 30 : 22}
             ry={active ? 12 : 8.5}
-            stroke={active ? "#F5D878" : "#EAB308"}
-            strokeWidth={active ? 2 : 1.2}
-            opacity={active ? 0.95 : 0.4}
+            stroke={active ? "#E23B2E" : "#5B9BD5"}
+            strokeWidth={active ? 2.4 : 1.4}
+            opacity={active ? 0.95 : 0.5}
             style={{ transition: "all 0.5s ease" }}
           />
         );
