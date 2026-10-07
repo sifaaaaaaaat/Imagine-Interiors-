@@ -5,9 +5,9 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type { RealProject } from "@/data/realProjects";
 
-/* Compact place card anchored to its marker — the info card a maps app
- * shows when you reach a pin. Light paper styling: white card, ink text,
- * red pin accent. The whole card opens the project detail page. */
+/* Compact location-info card, visually anchored to its marker — like the
+ * place card Google Maps shows when you reach a pin. Dark, bordered, with a
+ * gold arrow; the whole card opens the project's existing detail page. */
 export default function ProjectCard({
   project,
   x,
@@ -43,7 +43,7 @@ export default function ProjectCard({
       <button
         onClick={() => router.push(`/project/${project.id}`)}
         aria-label={`Open ${project.title}`}
-        className="group block w-[300px] cursor-pointer overflow-hidden rounded-2xl border border-[#D8D2C4] bg-white/95 text-left shadow-[0_22px_54px_rgba(96,78,45,0.28)] backdrop-blur-sm transition-colors duration-300 hover:border-[#B9AE97] sm:w-[330px]"
+        className="group block w-[300px] cursor-pointer overflow-hidden rounded-xl border border-white/12 bg-[#0B0B0B]/95 text-left shadow-[0_18px_50px_rgba(0,0,0,0.65)] backdrop-blur-sm transition-colors duration-300 hover:border-yellow-400/40 sm:w-[330px]"
       >
         <div className="relative h-[170px] w-full overflow-hidden sm:h-[185px]">
           <Image
@@ -54,30 +54,24 @@ export default function ProjectCard({
             loading="lazy"
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
           />
-          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white/85 to-transparent" />
-          {/* category chip over the photo, like a map place label */}
-          <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[9.5px] font-semibold tracking-[0.14em] text-[#5F4B32] uppercase shadow-sm">
-            {project.category}
-          </span>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0B] via-transparent to-transparent" />
         </div>
 
         <div className="flex items-end justify-between gap-3 px-4 pb-3.5 pt-3">
           <div className="min-w-0">
-            <h3 className="truncate text-[15px] font-semibold leading-snug text-[#232323]">
+            <h3 className="truncate text-[15px] font-semibold leading-snug text-[#F2F2F2]">
               {project.title}
             </h3>
-            <p className="mt-0.5 flex items-center gap-1.5 truncate text-[12px] text-[#7A7468]">
-              {/* tiny map-pin glyph */}
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="#E23B2E" aria-hidden className="shrink-0">
-                <path d="M12 0C5.4 0 0 5.4 0 12c0 8.2 9.5 17.2 10.9 18.5a1.6 1.6 0 0 0 2.2 0C14.5 29.2 24 20.2 24 12c0-6.6-5.4-12-12-12Zm0 16.8a4.9 4.9 0 1 1 0-9.8 4.9 4.9 0 0 1 0 9.8Z" />
-              </svg>
+            <p className="mt-0.5 truncate text-[12px] text-[#9C9C9C]">
               {project.location || "Dhaka, Bangladesh"}
             </p>
-            <p className="mt-1 text-[11px] tracking-wide text-[#8A8478]">
+            <p className="mt-1 text-[11px] tracking-wide text-[#8A8A8A]">
+              <span className="uppercase">{project.category}</span>
+              <span className="mx-1.5 text-[#5A5A5A]">·</span>
               <span>{project.year}</span>
             </p>
           </div>
-          <span className="mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#D8D2C4] bg-white text-[#E23B2E] transition-all duration-300 group-hover:border-[#E23B2E]/50 group-hover:bg-[#E23B2E]/10">
+          <span className="mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 text-yellow-400 transition-all duration-300 group-hover:border-yellow-400/60 group-hover:bg-yellow-400/10">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14m0 0l-6-6m6 6l-6 6" />
             </svg>

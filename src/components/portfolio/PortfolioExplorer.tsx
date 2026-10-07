@@ -10,7 +10,6 @@ import {
   CATEGORIES,
   type CategoryFilter,
 } from "@/lib/mapLayout";
-import MapPaper from "@/components/portfolio/MapPaper";
 import MapRoute from "@/components/portfolio/MapRoute";
 import ProjectMarker from "@/components/portfolio/ProjectMarker";
 import ProjectCard from "@/components/portfolio/ProjectCard";
@@ -19,14 +18,10 @@ import ProjectCategoryFilter from "@/components/portfolio/ProjectCategoryFilter"
 /* ============================================================================
  * PORTFOLIO EXPLORER — "Projects Across Places"
  *
- * A full-screen, scroll-driven map journey styled after a real maps app: a
- * white folded paper city sheet (MapPaper) floats on a warm-white page, and
- * the camera pans/tilts across it stop by stop as the user scrolls. A tall
- * spacer gives the page its scroll length; the visible layer is `sticky` and
- * the world (paper + route + markers + cards) pans under a virtual camera
- * whose position is the LERPED scroll progress. Stop anywhere: the camera
- * freezes exactly there. As the camera settles onto a stop it breathes in a
- * gentle zoom about the camera point — the "arrive and focus" feel.
+ * A full-screen, scroll-driven map journey. A tall spacer gives the page its
+ * scroll length; the visible layer is `sticky` and the world (route + markers
+ * + cards) pans under a virtual camera whose position is the LERPED scroll
+ * progress. Stop anywhere: the camera freezes exactly there.
  *
  * Performance: the 60fps loop mutates ONLY transforms/opacity directly on DOM
  * nodes (no React re-renders); React state updates just the active index.
@@ -134,7 +129,7 @@ export default function PortfolioExplorer({
     });
   }, []);
 
-  /* THE LOOP — lerped camera + gentle zoom-breath + imperative emphasis. */
+  /* THE LOOP — lerped camera + imperative emphasis. */
   useEffect(() => {
     const handleScroll = () => {
       const { top, scrollLen } = dimsRef.current;
@@ -162,22 +157,13 @@ export default function PortfolioExplorer({
       const tx = w / 2 - cam.x;
       const ty = h / 2 - cam.y;
 
-      // Zoom-breath: as the camera settles onto a stop it breathes in up to
-      // ~6% about the current camera point — the maps-app "arrive and focus"
-      // feel. Mid-glide between stops the scale eases back toward 1.
       if (worldRef.current) {
-        const n = Math.max(layout.stops.length, 1);
-        const focus = u * (n - 1);
-        const dist = Math.abs(focus - Math.round(focus)); // 0 = on a stop
-        const settle = Math.max(0, 1 - dist / 0.32);
-        const breathe = 1 + 0.06 * settle * settle;
-        worldRef.current.style.transformOrigin = `${cam.x.toFixed(2)}px ${cam.y.toFixed(2)}px`;
-        worldRef.current.style.transform = `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, 0) scale(${breathe.toFixed(4)})`;
+        worldRef.current.style.transform = `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, 0)`;
       }
 
       // Imperative emphasis per stop — no React re-render at 60fps.
-      const nStops = layout.stops.length;
-      const focus = u * Math.max(nStops - 1, 0);
+      const n = layout.stops.length;
+      const focus = u * Math.max(n - 1, 0);
       let nearest = 0;
       let nearestD = Infinity;
       itemsRef.current.forEach((item) => {
@@ -224,24 +210,21 @@ export default function PortfolioExplorer({
   return (
     <section
       ref={sectionRef}
-      className="relative bg-[#F4F1E9]"
+      className="relative bg-black"
       aria-label="Projects across places — map exploration"
     >
       {/* Pinned cinematic viewport — MUST precede the spacer so its natural
           position is at the section top; the spacer then provides the pinned
-          scroll length. Warm-white page so the paper sheet reads as a map
-          floating on white. */}
-      <div className="sticky top-0 h-screen w-full overflow-hidden bg-[#F4F1E9]">
-        {/* soft paper-page vignette — warm light falloff, no dark edges */}
-        <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(120%_90%_at_50%_45%,transparent_55%,rgba(112,94,66,0.10)_100%)]" />
+          scroll length. */}
+      <div className="sticky top-0 h-screen w-full overflow-hidden bg-black">
+        <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(120%_90%_at_50%_45%,transparent_55%,rgba(0,0,0,0.55)_100%)]" />
 
-        {/* THE WORLD — the paper city map panning under the camera. */}
+        {/* THE WORLD — abstract map surface panning under the camera. */}
         <div
           ref={worldRef}
           className="absolute left-0 top-0 will-change-transform"
           style={{ width: layout.world.w, height: layout.world.h }}
         >
-          <MapPaper layout={layout} />
           <MapRoute layout={layout} activeIndex={activeIndex} />
 
           {layout.stops.map((stop, i) => {
@@ -303,25 +286,25 @@ export default function PortfolioExplorer({
 
         {/* ======================= UI CHROME ======================= */}
 
-        {/* TOP LEFT — editorial title block, ink on paper. */}
+        {/* TOP LEFT — editorial title block. */}
         <header className="pointer-events-none absolute left-5 top-7 z-20 max-w-[280px] sm:left-10 sm:top-10 sm:max-w-sm">
-          <p className="mb-3 flex items-center gap-3 text-[11px] font-semibold tracking-[0.35em] text-[#1F5E96]">
+          <p className="mb-3 flex items-center gap-3 text-[11px] font-semibold tracking-[0.35em] text-yellow-400">
             OUR WORK
-            <span className="inline-block h-px w-10 bg-[#1F5E96]/50" />
+            <span className="inline-block h-px w-10 bg-yellow-400/60" />
           </p>
-          <h1 className="font-display text-[42px] leading-[1.04] text-[#232323] sm:text-6xl">
+          <h1 className="font-display text-[42px] leading-[1.04] text-[#F5F1E6] sm:text-6xl">
             Projects
             <br />
             Across Places
           </h1>
-          <p className="mt-4 max-w-[300px] text-[12.5px] leading-relaxed text-[#7A7468]">
+          <p className="mt-4 max-w-[300px] text-[12.5px] leading-relaxed text-[#9A9A9A]">
             From cozy homes to vibrant commercial spaces, our work lives in
             different corners — each with its own story.
           </p>
           <p className="mt-6 hidden text-[11px] tracking-[0.22em] text-[#6E6E6E] sm:block">
             {String(Math.min(activeIndex + 1, nStops)).padStart(2, "0")} /{" "}
             {String(nStops).padStart(2, "0")}
-            <span className="mx-2 text-[#C6BFAF]">·</span>SCROLL TO TRAVEL
+            <span className="mx-2 text-[#3F3F3F]">·</span>SCROLL TO TRAVEL
           </p>
           {/* Mobile progress + hint */}
           <p className="mt-5 text-[10px] tracking-[0.22em] text-[#6E6E6E] sm:hidden">
@@ -335,17 +318,17 @@ export default function PortfolioExplorer({
           <ProjectCategoryFilter active={filter} counts={counts} onChange={handleFilterChange} />
         </div>
 
-        {/* Mobile category chips: white pill bar, blue active (maps-app look). */}
+        {/* Mobile category chips. */}
         <div className="absolute left-0 right-0 top-5 z-30 flex justify-center px-4 sm:hidden">
-          <div className="flex max-w-full gap-1.5 overflow-x-auto rounded-full border border-[#DDD6C6] bg-white/85 px-2 py-1.5 backdrop-blur-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex max-w-full gap-1.5 overflow-x-auto rounded-full border border-white/10 bg-black/70 px-2 py-1.5 backdrop-blur-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat}
                 onClick={() => handleFilterChange(cat)}
                 className={`whitespace-nowrap rounded-full px-3 py-1 text-[10px] font-medium tracking-[0.12em] transition-colors ${
                   filter === cat
-                    ? "bg-[#3E8ED0] text-white"
-                    : "text-[#5B554A] hover:text-[#232323]"
+                    ? "bg-yellow-400 text-black"
+                    : "text-[#9A9A9A] hover:text-white"
                 }`}
               >
                 {cat}
@@ -356,20 +339,20 @@ export default function PortfolioExplorer({
 
         {/* BOTTOM LEFT — brand (desktop only; mobile keeps the tagline). */}
         <div className="pointer-events-none absolute bottom-6 left-5 z-20 hidden items-center gap-3 sm:flex sm:bottom-9 sm:left-10">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3E8ED0" strokeWidth="1.4">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#EAB308" strokeWidth="1.4">
             <path d="M12 2l3.2 6.8L22 10l-5 4.9L18.2 22 12 18.4 5.8 22 7 14.9 2 10l6.8-1.2L12 2Z" />
           </svg>
-          <span className="text-[10.5px] font-semibold tracking-[0.35em] text-[#232323]">
+          <span className="text-[10.5px] font-semibold tracking-[0.35em] text-[#D8D3C4]">
             IMAGINE INTERIORS
           </span>
         </div>
 
         {/* BOTTOM RIGHT — tagline (centered on mobile). */}
         <div className="pointer-events-none absolute bottom-6 left-0 right-0 z-20 flex justify-center sm:left-auto sm:right-5 sm:bottom-9 sm:right-10 sm:justify-end">
-          <span className="text-[10.5px] font-medium tracking-[0.3em] text-[#1F5E96]">
+          <span className="text-[10.5px] font-medium tracking-[0.3em] text-yellow-400">
             SPACES THAT TELL STORIES.
           </span>
-          <span className="hidden h-px w-10 bg-[#1F5E96]/40 sm:block" />
+          <span className="hidden h-px w-10 bg-yellow-400/50 sm:block" />
         </div>
       </div>
 

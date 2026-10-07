@@ -3,9 +3,8 @@
 import React from "react";
 import { CATEGORIES, type CategoryFilter } from "@/lib/mapLayout";
 
-/* Vertical project-category navigation (top right), paper style: a thin blue
- * thread through the dots; the active entry gets a filled blue dot matching
- * the blue pins. Red is reserved by convention for the active pin. */
+/* Vertical project-category navigation (top right), with the route-line +
+ * dots visual from the reference: the active entry shows a filled gold dot. */
 export default function ProjectCategoryFilter({
   active,
   counts,
@@ -16,12 +15,9 @@ export default function ProjectCategoryFilter({
   onChange: (c: CategoryFilter) => void;
 }) {
   return (
-    <nav
-      aria-label="Project categories"
-      className="relative flex flex-col gap-[18px] rounded-2xl border border-[#DDD6C6] bg-white/85 px-4 py-4 shadow-[0_14px_36px_rgba(96,78,45,0.14)] backdrop-blur-sm"
-    >
-      {/* vertical thread through the dots */}
-      <span className="absolute bottom-5 left-[21px] top-5 w-px bg-gradient-to-b from-[#5B9BD5]/60 via-[#5B9BD5]/30 to-[#5B9BD5]/10" />
+    <nav aria-label="Project categories" className="relative flex flex-col gap-[18px]">
+      {/* vertical gold line through the dots */}
+      <span className="absolute left-[5px] top-2 bottom-2 w-px bg-gradient-to-b from-yellow-400/50 via-yellow-400/25 to-yellow-400/10" />
 
       {CATEGORIES.map((cat) => {
         const isActive = cat === active;
@@ -36,19 +32,19 @@ export default function ProjectCategoryFilter({
             <span
               className="relative z-10 h-[11px] w-[11px] shrink-0 rounded-full border transition-all duration-300"
               style={{
-                borderColor: isActive ? "#3E8ED0" : "rgba(95,75,50,0.4)",
-                background: isActive ? "#3E8ED0" : "transparent",
-                boxShadow: isActive ? "0 0 10px rgba(62,142,208,0.55)" : "none",
+                borderColor: isActive ? "#EAB308" : "rgba(255,255,255,0.35)",
+                background: isActive ? "#EAB308" : "transparent",
+                boxShadow: isActive ? "0 0 10px rgba(234,179,8,0.8)" : "none",
               }}
             />
             <span
-              className={`text-[10.5px] font-semibold tracking-[0.14em] transition-colors duration-300 ${
-                isActive ? "text-[#1F5E96]" : "text-[#7A7468] group-hover:text-[#232323]"
+              className={`text-[10.5px] font-medium tracking-[0.14em] transition-colors duration-300 ${
+                isActive ? "text-yellow-400" : "text-[#8F8F8F] group-hover:text-[#C9C9C9]"
               }`}
             >
               {cat}
               {cat !== "ALL PROJECTS" && count === 0 && (
-                <span className="ml-1.5 text-[9px] text-[#B4AC9C]">— 0</span>
+                <span className="ml-1.5 text-[9px] text-[#5A5A5A]">— 0</span>
               )}
             </span>
           </button>
